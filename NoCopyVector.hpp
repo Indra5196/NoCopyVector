@@ -7,7 +7,12 @@
 #include <stdexcept>
 #include <utility>
 #include <memory_resource>
+#include <algorithm> // For std::move, std::swap
+#include <limits>    // For std::numeric_limits
+#include <memory>    // For std::uninitialized_copy
 
+// Enclosed in unnamed namespace so that its contents are not visible outside the header
+namespace {
 template <typename T>
 struct CustomDeleter {
     std::pmr::polymorphic_allocator<T> allocator;
@@ -153,7 +158,10 @@ private:
     std::unique_ptr<DataType> data_;
     void reallocate(size_type new_cap);
     std::unique_ptr<std::pmr::unsynchronized_pool_resource> pool;
+    std::pmr::pool_options options;
 };
+
+}
 
 template <typename T>
 using NoCopyVector = typename std::conditional<
@@ -162,6 +170,6 @@ using NoCopyVector = typename std::conditional<
     MyNoCopyVector<T>
 >::type;
 
-#include "MyNoCopyVector.tpp"
+#include "NoCopyVector.tpp"
 
 #endif // MyNoCopyVector_H

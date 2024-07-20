@@ -1,15 +1,12 @@
-#include "MyNoCopyVector.h"
-#include <algorithm> // For std::move, std::swap
-#include <limits>    // For std::numeric_limits
-#include <memory>    // For std::uninitialized_copy
+#include "NoCopyVector.hpp"
 
 template <typename T>
-MyNoCopyVector<T>::MyNoCopyVector() : pool({sizeof(T), 1}) {
+MyNoCopyVector<T>::MyNoCopyVector() : options{sizeof(T), 1}, pool(std::make_unique<std::pmr::unsynchronized_pool_resource>(options)) {
     data_ = std::make_unique<DataType>();
 }
 
 template <typename T>
-MyNoCopyVector<T>::MyNoCopyVector(size_type count, const T& value) : pool(std::make_unique<std::pmr::unsynchronized_pool_resource>({count * sizeof(T), 1})) {
+MyNoCopyVector<T>::MyNoCopyVector(size_type count, const T& value) : options{sizeof(T), 1}, pool(std::make_unique<std::pmr::unsynchronized_pool_resource>(options)) {
     data_ = std::make_unique<DataType>(count);
     // Allocate memory for an instance of A using the allocator
     for (size_t i = 0; i < count; ++i) {
@@ -151,7 +148,7 @@ void MyNoCopyVector<T>::reserve(size_type new_cap) {
 
 template <typename T>
 typename MyNoCopyVector<T>::size_type MyNoCopyVector<T>::capacity() const noexcept {
-    return capacity_;
+    // return capacity_;
 }
 
 template <typename T>
@@ -179,20 +176,20 @@ typename MyNoCopyVector<T>::iterator MyNoCopyVector<T>::insert(const_iterator po
     data_->insert(pos, count, Element<T>(value, pool));
 }
 
-template <typename T>
-typename MyNoCopyVector<T>::iterator MyNoCopyVector<T>::insert(const_iterator pos, const T& value) {
-    for (auto i : init) {
-        data_->insert(pos, Element<T>(i, pool));
-    }
-}
+// template <typename T>
+// typename MyNoCopyVector<T>::iterator MyNoCopyVector<T>::insert(const_iterator pos, const T& value) {
+//     for (auto i : init) {
+//         data_->insert(pos, Element<T>(i, pool));
+//     }
+// }
 
 template <typename T>
 void MyNoCopyVector<T>::push_back(const T& value) {
     data_->emplace_back(value, pool);
 }
 
-template <typename... Args>
-reference MyNoCopyVector<T>::emplace_back(Args&&... args);
- {
-    data_->emplace_back(args...);
- }
+// template <typename... Args>
+// typename MyNoCopyVector<T>::reference::emplace_back(Args&&... args);
+// {
+//     data_->emplace_back(args...);
+// }
